@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+						http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+						http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+						http://www.springframework.org/schema/context 
+						http://www.springframework.org/schema/context/spring-context-4.0.xsd
+						http://www.springframework.org/schema/tx 
+						http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+						http://www.springframework.org/schema/aop
+						http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+	<context:component-scan base-package="br.usp.*" />
+	<context:annotation-config />
+	<mvc:annotation-driven />
+	<aop:aspectj-autoproxy />  
+	<tx:annotation-driven />
+
+	<mvc:default-servlet-handler />
+
+	<mvc:interceptors>
+		<bean class="br.usp.websemantica.interceptor.Interceptor" />
+	</mvc:interceptors>
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/views/" />
+		<property name="suffix" value="" />
+		<property name="redirectHttp10Compatible" value="false" />
+	</bean>
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:config.dev.properties</value>				
+			</list>
+		</property>
+	</bean>
+
+	<!-- NAMING STRATEGY BEAN -->
+	<bean id="namingStrategy" class="org.hibernate.cfg.ImprovedNamingStrategy" />
+	
+	<!-- SPRING CONTENT NEGOTIATION BEAN -->
+	<!--<bean id="contentNegotiationManager"
+             class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+	    <property name="favorPathExtension" value="true" />
+	    <property name="favorParameter" value="true" />
+	    <property name="parameterName" value="mediaType" />
+	    <property name="ignoreAcceptHeader" value="true"/>
+	    <property name="useJaf" value="false"/>
+	    <property name="defaultContentType" value="text/html" />
+	 
+	    <property name="mediaTypes">
+	        <map>
+	            <entry key="rdf" value="application/rdf+xml" />
+	            <entry key="xml" value="application/xml" />
+	       </map>
+	    </property>
+	</bean>-->
+	
+	<!-- DEFAULT DATABASE -->
+
+	<bean id="dataSourceDefault"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://${config.datasource.redbox.url}" />
+		<property name="username" value="${config.datasource.redbox.username}" />
+		<property name="password" value="${config.datasource.redbox.password}" />
+	</bean>
+	
+	<bean id="dataSourceSistb"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://${config.datasource.sistb.url}" />
+		<property name="username" value="${config.datasource.sistb.username}" />
+		<property name="password" value="${config.datasource.sistb.password}" />
+	</bean>
+
+	<bean id="sessionFactoryDefault"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSourceDefault" />
+		<property name="configLocation">
+			<value>classpath:hibernate.cfg.xml</value>
+		</property>
+		<property name="namingStrategy" ref="namingStrategy" />
+		<property name="packagesToScan">
+			<array>
+				<value>br.usp.websemantica.model</value>
+			</array>
+		</property>
+	</bean>
+	
+	<bean id="sessionFactorySistb"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSourceSistb" />
+		<property name="configLocation">
+			<value>classpath:hibernate.cfg.xml</value>
+		</property>
+		<property name="namingStrategy" ref="namingStrategy" />
+		<property name="packagesToScan">
+			<array>
+				<value>br.usp.websemantica.model</value>
+			</array>
+		</property>
+	</bean>
+	
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactoryDefault" />
+	</bean>
+	
+	<bean id="transactionManagerSistb"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactorySistb" />
+	</bean>
+		
+</beans>
